@@ -1,0 +1,14 @@
+Enact
+=====
+
+Enact is a CSS selector-based templating system.
+It is strongly based on [Enlive](https://github.com/cgrand/enlive), a library for Clojure.
+
+Content (HTML documents or raw strings) are modified using selections, and transformation functions.
+Transformation functions can be any Python function/method you like.
+
+Usage
+-----
+
+TODO
+
