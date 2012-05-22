@@ -12,3 +12,8 @@ Usage
 
 TODO
 
+License
+-------
+This software is released under the MIT License.
+Please see the `LICENSE` file
+
