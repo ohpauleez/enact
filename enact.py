@@ -94,7 +94,7 @@ class Enact(object):
             raise TransformException("Your transformation function MUST return a string or a selection obj (HTML obj) - " + fn.__name__)
 
     @staticmethod
-    def ensureHTML(obj, recastStream=False):
+    def ensureHTML(obj, recast_stream=False):
         """
         Normalize various data types into a uniform HTML-doc type
         """
