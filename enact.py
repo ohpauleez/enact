@@ -53,7 +53,7 @@ class Enact(object):
             selection = Enact.cssSelection(css_selector, htmldoc, translator)
             action_pairs = zip(action_list[0::2], action_list[1::2])
             transformed_selection = reduce(Enact.applyTransform, action_pairs, selection)
-            replace_dict[selection.render('html',)] = transformed_selection.render('html')
+            replace_dict[selection.render('html')] = transformed_selection.render('html')
         # Reduce the selection-based transforms that were made against the original content,
         #   generating the final transformed template/content
         return reduce(lambda result,(substring,replacement): result.replace(substring, replacement),
