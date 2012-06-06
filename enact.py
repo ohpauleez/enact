@@ -53,7 +53,7 @@ class Enact(object):
             selection = Enact.cssSelection(css_selector, htmldoc, translator)
             action_pairs = zip(action_list[0::2], action_list[1::2])
             transformed_selection = reduce(Enact.applyTransform, action_pairs, selection)
-            replace_dict[selection.render('html', doctype = 'html5')] = transformed_selection.render('html', doctype = 'html5')
+            replace_dict[selection.render('html',)] = transformed_selection.render('html')
         # Reduce the selection-based transforms that were made against the original content,
         #   generating the final transformed template/content
         return reduce(lambda result,(substring,replacement): result.replace(substring, replacement),
@@ -98,15 +98,20 @@ class Enact(object):
         """
         Normalize various data types into a uniform HTML-doc type
         """
-        # TODO - we need to be smarter about this - dispatching shouldn't use iteration
-        dispatch = {
-                Stream:     recastStream and HTML(obj, encoding='utf-8') or obj,
-                basestring: HTML(obj, encoding='utf-8'),
-                list:       HTML(" ".join(map(str, obj)), encoding='utf-8'),
-            }
-        for k in dispatch:
-            if isinstance(obj, k): return dispatch[k]
-        raise EnactException("Could not correctly coerce into HTML obj - " + str(obj))
+        # This is terrible...
+        # TODO - we need to be smarter about this dispatching
+        ret = obj
+        if isinstance(obj, Stream) and not recast_stream:
+            pass
+        elif isinstance(obj, Stream) and recast_stream:
+            ret = HTML(obj, encoding='utf-8')
+        elif isinstance(obj, basestring):
+            ret = HTML(obj, encoding='utf-8')
+        elif isinstance(obj, list):
+            ret = HTML(" ".join(map(str, obj)), encoding='utf-8')
+        else:
+            raise EnactException("Could not correctly coerce into HTML obj - " + str(obj))
+        return ret
 
 
 class Actions(object):
@@ -214,7 +219,7 @@ class Actions(object):
 
 #s = '''<div id="tutor-details" class="well span8"><p>This is a bunch of text</p><a href="http://www.tutorspree.com">Home</a></div>'''
 #d = HTML(s)
-#ss = '''<div id="new-id" class="well span8"><p><h1>Best Tutor 2012</h1></p><p>This is a new piece of text</p><a href="http://www.tutorspree.com">Home</a></div>'''
+#ss = '''<!DOCTYPE html>\n<div id="new-id" class="well span8"><p><h1>Best Tutor 2012</h1></p><p>This is a new piece of text</p><a href="http://www.tutorspree.com">Home</a></div>'''
 #dd = Enact.string(s,
 #             "#tutor-details", [Actions.setAttrs, {"id": "new-id"}],
 #              "p", [Actions.htmlContent, "<h1>Best Tutor 2012</h1>",
@@ -222,6 +227,9 @@ class Actions(object):
 #                    #Actions.wrap, "h5",
 #                    #Actions.sanitize, None,
 #                    ]
-#             )
+#
+#              )
+#print dd
+#print ss
 #print dd == ss
 
