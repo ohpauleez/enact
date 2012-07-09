@@ -137,7 +137,27 @@ class Actions(object):
         if isinstance(attr_list, basestring):
             attr_list = [attr_list]
         return Actions.setAttrs(selection, dict(zip(attr_list, itertools.repeat(None))))
-    
+
+    @staticmethod
+    def appendAttrs(selection, attr_dict):
+        def appendAttrAux(name, event):
+            name = str(name)
+            attrs = dict([(str(attr),value) for attr,value in event[1][1]])
+            ret = attrs[name] + " " + attr_dict[name]
+            return ret
+        return reduce(lambda old,(attr_key, value): old | Actions.transformer.attr(attr_key, appendAttrAux).end(),
+                        attr_dict.items(), selection)
+
+    @staticmethod
+    def removeFromAttrs(selection, attr_dict):
+        def removeAttrAux(name, event):
+            name = str(name)
+            attrs = dict([(str(attr),value) for attr,value in event[1][1]])
+            ret = reduce(lambda old, new: old.replace(new, ""), attr_dict[name].split(), attrs[name])
+            return ret.strip()
+        return reduce(lambda old,(attr_key, value): old | Actions.transformer.attr(attr_key, removeAttrAux).end(),
+                        attr_dict.items(), selection)
+
     @staticmethod
     def content(selection, content_str):
         return selection | Actions.transformer.empty().prepend(content_str).end()
@@ -232,4 +252,3 @@ class Actions(object):
 #print dd
 #print ss
 #print dd == ss
-
