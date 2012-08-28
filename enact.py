@@ -57,7 +57,8 @@ class Enact(object):
         # Reduce the selection-based transforms that were made against the original content,
         #   generating the final transformed template/content
         return reduce(lambda result,(substring,replacement): result.replace(substring, replacement),
-                        replace_dict.items(), htmldoc.render('html', doctype = 'html5'))
+                        sorted(replace_dict.items(), key=lambda(k,v): len(k), reverse=True),
+                        htmldoc.render('html', doctype='html5'))
 
     @staticmethod
     def cssToXpath(css_selector, translator=None):
@@ -238,7 +239,6 @@ class Actions(object):
         return selection | Actions.sanitizer
 
 #s = '''<div id="tutor-details" class="well span8"><p>This is a bunch of text</p><a href="http://www.tutorspree.com">Home</a></div>'''
-#d = HTML(s)
 #ss = '''<!DOCTYPE html>\n<div id="new-id" class="well span8"><p><h1>Best Tutor 2012</h1></p><p>This is a new piece of text</p><a href="http://www.tutorspree.com">Home</a></div>'''
 #dd = Enact.string(s,
 #             "#tutor-details", [Actions.setAttrs, {"id": "new-id"}],
@@ -246,9 +246,20 @@ class Actions(object):
 #                    Actions.after, "<p>This is a new piece of text</p>",
 #                    #Actions.wrap, "h5",
 #                    #Actions.sanitize, None,
-#                    ]
-#
-#              )
+#                    ])
 #print dd
 #print ss
 #print dd == ss
+#s = '<div class="package" data-package-id="1"><div class="student"><div class="name">Name</div></div></div>'
+#ss = '<!DOCTYPE html>\n<div class="package" data-package-id="2"><div class="student"><div class="name">lala</div></div></div>'
+#dd = Enact.string(s,
+#                ".package", [Actions.setAttrs, {"data-package-id": "2"}],
+#                ".student .name", [Actions.content, "lala"])
+#print dd == ss
+#s = '<div class="package" data-package-id="1"><div class="student"><p class="name">Name</p></div></div>'
+#ss = '<!DOCTYPE html>\n<div class="package" data-package-id="2"><div class="student"><p class="name">lala</p></div></div>'
+#dd = Enact.string(s,
+#                ".package", [Actions.setAttrs, {"data-package-id": "2"}],
+#                ".student .name", [Actions.content, "lala"])
+#print dd == ss
+
