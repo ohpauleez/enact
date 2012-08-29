@@ -32,12 +32,13 @@ class Enact(object):
             return Enact.string(document_str, *transform_list)
 
     @staticmethod
-    def string(document_str, *transform_list):
+    def string(document_str, *transform_list, **option_overrides):
         """
         Perform transformations against the contents of a string
         Arguments:
             document_str - a string, the document/str to perform transformations against
             *transform_list - a variable-len list, the transforms to perform on on the content
+            **option_overrides - a variable-len keyword arg list, the formatting/processing options to use
         Returns:
              - a string, the transformed content
         """
@@ -45,10 +46,14 @@ class Enact(object):
             return document_str
         if len(transform_list) % 2:
             raise EnactException("Every transform selection needs exactly one arg.  You passed: " + str(transform_list))
+        # Get formatting/processing options
+        doctype = option_overrides.get("doctype", "html5")
+        # Process the transforms
         htmldoc = Enact.ensureHTML(document_str)
         transforms = zip(transform_list[0::2], transform_list[1::2])
         translator = HTMLTranslator() # this is done for performance only
         replace_dict = {}
+        # Build up the replacement dict: {original_str: substitution_str}
         for css_selector, action_list in transforms:
             selection = Enact.cssSelection(css_selector, htmldoc, translator)
             action_pairs = zip(action_list[0::2], action_list[1::2])
@@ -58,7 +63,7 @@ class Enact(object):
         #   generating the final transformed template/content
         return reduce(lambda result,(substring,replacement): result.replace(substring, replacement),
                         sorted(replace_dict.items(), key=lambda(k,v): len(k), reverse=True),
-                        htmldoc.render('html', doctype='html5'))
+                        htmldoc.render('html', doctype=doctype))
 
     @staticmethod
     def cssToXpath(css_selector, translator=None):
@@ -261,5 +266,12 @@ class Actions(object):
 #dd = Enact.string(s,
 #                ".package", [Actions.setAttrs, {"data-package-id": "2"}],
 #                ".student .name", [Actions.content, "lala"])
+#print dd == ss
+#s = '<div class="package" data-package-id="1"><div class="student"><p class="name">Name</p></div></div>'
+#ss = '<div class="package" data-package-id="2"><div class="student"><p class="name">lala</p></div></div>'
+#dd = Enact.string(s,
+#                ".package", [Actions.setAttrs, {"data-package-id": "2"}],
+#                ".student .name", [Actions.content, "lala"],
+#                doctype=None)
 #print dd == ss
 
