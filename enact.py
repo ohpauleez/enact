@@ -27,7 +27,7 @@ class Enact(object):
         Returns:
              - a string, the transformed content
         """
-        with file(file_path) as f:
+        with open(file_path) as f:
             document_str = f.read()
             return Enact.string(document_str, *transform_list)
 
